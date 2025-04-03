@@ -64,7 +64,7 @@ const ForgotPass = () => {
         postApi({
             link: VcApi.api.login.postRecoverPass,
             data: {
-                tenant: tenant,
+                tenantName: tenant,
                 email: email,
                 otpCode: otp
             },

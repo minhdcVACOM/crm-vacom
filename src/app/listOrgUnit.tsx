@@ -3,12 +3,14 @@ import VcSearchBar from "@/components/vcSearchBar";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { getApi } from "@/utils/api";
 import { VcApi, VcConstant } from "@/utils/constant";
-import { router, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BackHandler, FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, } from "react-redux";
 import { VcText } from "@/components/vcText";
 import { setOrgUnit } from "@/redux/vcSlice";
+import { useRouter } from "expo-router";
+import { loginHelper } from "@/utils/hooks/loginHelper";
+import VcBtnDownloadPdf from "@/components/vcBbtDownloadPdf";
 interface IData {
     id: string,
     code: string,
@@ -17,6 +19,7 @@ interface IData {
     address: string
 }
 const ListOrgUnit = () => {
+    const router = useRouter();
     // const orgUnit = useSelector((state: IVcStore) => state.app.orgUnit)
     const [txtSearch, setTxtSearch] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
@@ -43,7 +46,7 @@ const ListOrgUnit = () => {
         return () => backHandler.remove();
     }, []);
     return (
-        <>
+        <View style={{ flex: 1 }}>
             <VcText type="header" style={{ textAlign: "center", padding: 20, backgroundColor: VcConstant.colors.primary, color: "#fff" }} text='Chọn đơn vị' />
             <VcSearchBar value={txtSearch} onSearch={setTxtSearch} onBack={() => router.replace("/")} />
             <FlatList
@@ -65,15 +68,22 @@ const ListOrgUnit = () => {
                     />
                 }
             />
-        </>
+            <View style={{ flexDirection: "row" }}>
+                <VcBtnDownloadPdf link='/api/app/document/download/67db8d07f5729de6633291e3' />
+                <VcPress title="Dynamic View" onPress={() => router.navigate("/dynamicView")} />
+            </View>
+        </View>
     );
 }
 interface IProgs {
     item: IData
 }
 const ItemView = ({ item }: IProgs) => {
+    const router = useRouter();
     const dispatch = useDispatch();
-    const onPress = () => {
+    const { saveOrgCode } = loginHelper();
+    const onPress = async () => {
+        await saveOrgCode(item.id);
         dispatch(setOrgUnit(item));
         router.replace("/(drawer)");
     }

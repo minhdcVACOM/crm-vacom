@@ -7,6 +7,7 @@ import { Entypo, FontAwesome, Ionicons } from '@expo/vector-icons';
 import { useCallback } from 'react';
 import React from 'react';
 import VcDrawerContent from '@/components/vcDrawerContent';
+import { SafeAreaView } from 'react-native';
 const getDrawerIcon = (IconComponent: any, name: string) => ({ size, color }: any) => (
     <IconComponent name={name} size={size} color={color} />
 );
@@ -36,28 +37,32 @@ const CustomHeader = ({ navigation }: any) => {
 };
 const LayoutDrawer = () => {
     return (
-        <Drawer
-            drawerContent={renderDrawerContent}
-            screenOptions={{
-                header: (props) => <CustomHeader {...props} />
-            }}
-        >
-            {screens.map(({ name, label, icon }) => (
-                <Drawer.Screen
-                    key={name}
-                    name={name}
-                    options={{
-                        drawerLabel: label,
-                        drawerIcon: icon,
-                        drawerActiveTintColor: VcConstant.colors.primary,
-                        drawerActiveBackgroundColor: VcConstant.colors.primaryLight,
-                        drawerItemStyle: { borderRadius: 15 },
-                        drawerStyle: { width: 280 },
-                        headerStyle: { height: 50 }
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <SafeAreaView style={{ flex: 1 }}>
+                <Drawer
+                    drawerContent={renderDrawerContent}
+                    screenOptions={{
+                        header: (props) => <CustomHeader {...props} />
                     }}
-                />
-            ))}
-        </Drawer>
+                >
+                    {screens.map(({ name, label, icon }) => (
+                        <Drawer.Screen
+                            key={name}
+                            name={name}
+                            options={{
+                                drawerLabel: label,
+                                drawerIcon: icon,
+                                drawerActiveTintColor: VcConstant.colors.primary,
+                                drawerActiveBackgroundColor: VcConstant.colors.primaryLight,
+                                drawerItemStyle: { borderRadius: 15 },
+                                drawerStyle: { width: 280 },
+                                headerStyle: { height: 50 }
+                            }}
+                        />
+                    ))}
+                </Drawer>
+            </SafeAreaView>
+        </GestureHandlerRootView>
     );
 }
 

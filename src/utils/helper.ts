@@ -26,10 +26,10 @@ export const Helper = {
 
         return { message: ERROR_MESSAGES.UNKNOWN };
     },
-    toastShow: (msg: string, error?: boolean) => {
+    toastShow: (msg: string, error?: boolean, backgroundColor?: string) => {
         if (!msg) return;
         showToast(msg.trim(), {
-            backgroundColor: error ? VcConstant.colors.warning : VcConstant.colors.success
+            backgroundColor: backgroundColor ? backgroundColor : (error ? VcConstant.colors.warning : VcConstant.colors.success)
         });
     },
     showError: (error: IError) => {

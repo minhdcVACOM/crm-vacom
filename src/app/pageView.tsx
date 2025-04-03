@@ -11,7 +11,6 @@ import { router } from 'expo-router';
 import { VcConstant } from '@/utils/constant';
 import VcPress from '@/components/vcPress';
 import VcCard from '@/components/vcCard';
-import PdfDownloadView from '@/components/pdfDownloadView';
 const HEADER_MAX_HEIGHT = 100;
 const HEADER_MIN_HEIGHT = 60;
 const SettingScreen = () => {
@@ -86,36 +85,32 @@ const SettingScreen = () => {
         dataObjectId: "67e9efa4934481e7f74a9968"
     }
     return (
-        <>
-            <PdfDownloadView link='/api/app/document/download/67db8d07f5729de6633291e3' type='download' />
-            <PdfDownloadView link='/api/app/print-template' type='print' data={dataPrint} />
-        </>
-        //     <View style={styles.container}>
-        //         {/* Large Header */}
-        //         <Animated.View style={[styles.largeHeader, largeHeaderStyle]}>
-        //             <Animated.Text style={[VcConstant.stylesText("header"), largeTitleStyle]}>Tiêu đề</Animated.Text>
-        //         </Animated.View>
-        //         {/* Small Title with Icon & Back Button */}
-        //         <Animated.View style={[styles.smallTitleContainer, smallTitleStyle]}>
-        //             <VcPress onPress={() => router.back()}>
-        //                 <Ionicons name="arrow-back" size={24} color="#000" />
-        //             </VcPress>
-        //             <Animated.Text style={[styles.smallTitleText, titleTextStyle]}>Tiêu đề</Animated.Text>
-        //         </Animated.View>
+        <View style={styles.container}>
+            {/* Large Header */}
+            <Animated.View style={[styles.largeHeader, largeHeaderStyle]}>
+                <Animated.Text style={[VcConstant.stylesText("header"), largeTitleStyle]}>Tiêu đề</Animated.Text>
+            </Animated.View>
+            {/* Small Title with Icon & Back Button */}
+            <Animated.View style={[styles.smallTitleContainer, smallTitleStyle]}>
+                <VcPress onPress={() => router.back()}>
+                    <Ionicons name="arrow-back" size={24} color="#000" />
+                </VcPress>
+                <Animated.Text style={[styles.smallTitleText, titleTextStyle]}>Tiêu đề</Animated.Text>
+            </Animated.View>
 
-        //         {/* Scrollable Content */}
-        //         <Animated.ScrollView
-        //             contentContainerStyle={{ paddingTop: HEADER_MAX_HEIGHT + HEADER_MIN_HEIGHT }}
-        //             onScroll={scrollHandler}
-        //             scrollEventThrottle={16}
-        //         >
-        //             {Array.from({ length: 20 }).map((_, index) => (
-        //                 <VcCard key={index + ""} style={{ padding: 20, marginHorizontal: 10 }}>
-        //                     <Text style={styles.itemText}>Khai báo {index + 1}</Text>
-        //                 </VcCard>
-        //             ))}
-        //         </Animated.ScrollView>
-        //     </View>
+            {/* Scrollable Content */}
+            <Animated.ScrollView
+                contentContainerStyle={{ paddingTop: HEADER_MAX_HEIGHT + HEADER_MIN_HEIGHT }}
+                onScroll={scrollHandler}
+                scrollEventThrottle={16}
+            >
+                {Array.from({ length: 20 }).map((_, index) => (
+                    <VcCard key={index + ""} style={{ padding: 20, marginHorizontal: 10 }}>
+                        <Text style={styles.itemText}>Khai báo {index + 1}</Text>
+                    </VcCard>
+                ))}
+            </Animated.ScrollView>
+        </View>
     );
 };
 

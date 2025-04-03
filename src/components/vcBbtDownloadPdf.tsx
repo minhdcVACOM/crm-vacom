@@ -1,35 +1,40 @@
 import React, { useState } from "react";
-import { View, ActivityIndicator, Alert, Platform, PermissionsAndroid, Text, StyleSheet } from "react-native";
+import { ActivityIndicator, Platform, PermissionsAndroid } from "react-native";
 import * as MediaLibrary from "expo-media-library";
 import * as FileSystem from "expo-file-system";
 import { Buffer } from "buffer"; // Chuyển đổi binary -> base64
 import VcPress from "./vcPress";
 import * as Sharing from 'expo-sharing';
 import axios from "axios";
-import vcAxios from "@/utils/vcAxios";
+import Foundation from '@expo/vector-icons/Foundation';
 import { loginHelper } from "@/utils/hooks/loginHelper";
+import { VcConstant } from "@/utils/constant";
+import { router } from "expo-router";
+import { Helper } from "@/utils/helper";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 interface IProg {
     link: string;
-    type: "download" | "print" | "report";
-    data?: any
+    type?: "download" | "print" | "report";
+    dataPost?: { data: any, headers: any },
+    openWithShare?: boolean
 }
-const PdfDownloadView = (progs: IProg) => {
-    const { link, type, data } = progs;
-    const { getLinkApi, getToken, getOrdCode, getTenant } = loginHelper();
+const VcBtnDownloadPdf = ({ link, type = "download", dataPost, openWithShare }: IProg) => {
+    const { getLinkApi, getToken, getTenant, getOrdCode } = loginHelper();
     const [loading, setLoading] = useState(false);
     // Hàm yêu cầu quyền lưu file (Android 9 trở xuống)
     const requestStoragePermission = async () => {
         if (Platform.OS === "android" && Platform.Version < 29) {
             const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
             if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-                Alert.alert("Lỗi", "Cần cấp quyền lưu file để tiếp tục!");
+                Helper.toastShow("Cần cấp quyền lưu file để tiếp tục!", true)
                 return false;
             }
         }
         const { status } = await MediaLibrary.requestPermissionsAsync();
         if (status !== 'granted') {
-            console.log("Không có quyền truy cập bộ nhớ");
+            Helper.toastShow("Không có quyền truy cập bộ nhớ!", true)
+            // console.log("Không có quyền truy cập bộ nhớ");
             return false;
         }
         return true;
@@ -46,13 +51,20 @@ const PdfDownloadView = (progs: IProg) => {
     };
 
     async function openPDF(uri: string) {
-        // Kiểm tra thiết bị có hỗ trợ Sharing không
-        if (!(await Sharing.isAvailableAsync())) {
-            Alert.alert('Lỗi', 'Thiết bị không hỗ trợ mở file PDF.');
-            return;
+        if (openWithShare) {
+            // Kiểm tra thiết bị có hỗ trợ Sharing không
+            if (!(await Sharing.isAvailableAsync())) {
+                Helper.toastShow("Thiết bị không hỗ trợ mở file PDF.", true)
+                return;
+            }
+            // Mở file PDF bằng ứng dụng bên ngoài
+            await Sharing.shareAsync(uri, { mimeType: 'application/pdf' });
+        } else {
+            router.navigate({
+                pathname: "/pdfViewer",
+                params: { uri: uri }
+            })
         }
-        // Mở file PDF bằng ứng dụng bên ngoài
-        await Sharing.shareAsync(uri, { mimeType: 'application/pdf' });
     }
 
     // Lưu file vào thư mục Download
@@ -64,7 +76,7 @@ const PdfDownloadView = (progs: IProg) => {
                 throw new Error('Cần cấp quyền truy cập storage');
             }
             // 2. Kiểm tra đường dẫn file
-            const downloadPath = `${FileSystem.documentDirectory}${fileName.replace(/\s/g, "_")}`;
+            const downloadPath = `${FileSystem.documentDirectory}${fileName}`;
             // console.log('Đường dẫn file:', downloadPath);
 
             // // 3. Kiểm tra file tồn tại
@@ -75,46 +87,8 @@ const PdfDownloadView = (progs: IProg) => {
             await FileSystem.writeAsStringAsync(downloadPath, fileData, {
                 encoding: FileSystem.EncodingType.Base64,
             });
-            console.log('Đã ghi file:', fileName);
-
-            // // 5. Kiểm tra file sau khi ghi
-            // const fileExists = await FileSystem.getInfoAsync(downloadPath);
-            // console.log('File sau khi ghi:', fileExists);
-
-            // 6. Tạo asset
-            const asset = await MediaLibrary.createAssetAsync(downloadPath);
-            // console.log('Asset được tạo:', asset);
-            // 7. Kiểm tra asset
-            if (!asset) {
-                throw new Error('Không thể tạo asset');
-            }
-            // 8. Tạo album và lưu
-            const album = await MediaLibrary.getAlbumAsync('Download');
-            if (album) {
-                // Xác nhận file trong album
-                const assetsInAlbum0 = await MediaLibrary.getAssetsAsync({
-                    album: album,
-                    mediaType: ['unknown']
-                });
-                const existingFile0 = assetsInAlbum0.assets.find((a) => a.filename === fileName);
-                if (existingFile0) await MediaLibrary.deleteAssetsAsync([existingFile0.id]);
-                await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-            } else {
-                await MediaLibrary.createAlbumAsync('Download', asset, false);
-            }
-
-            // 9. Xác nhận file trong album
-            const assetsInAlbum = await MediaLibrary.getAssetsAsync({
-                album: album,
-                mediaType: ['unknown']
-            });
-            const existingFile = assetsInAlbum.assets.find((a) => a.filename === fileName);
-
-            if (existingFile) {
-                await openPDF(existingFile.uri);
-                // console.log('Files trong album:', assetsInAlbum["assets"][len - 1]);
-                return existingFile.uri;
-            }
+            // console.log('Đã ghi file:', downloadPath);
+            await openPDF(downloadPath);
         } catch (error) {
             console.error('Lỗi chi tiết:', error);
             throw error;
@@ -142,20 +116,14 @@ const PdfDownloadView = (progs: IProg) => {
                     "Content-Type": "application/json",
                     "Accept-language": "vi",
                     "_tenant": await getTenant(),
-                    "X-Orgcode": "6466d3792b56045d33ff90d5",
-                    "Authorization": `Bearer ${await getToken()}`,
-                    "X-Menu": "65a0ea3b0760cc0aee3c588f"
+                    "X-Orgcode": await getOrdCode(),
+                    "Authorization": `Bearer ${await getToken()}`
                 };
                 response = await axios({
                     url: baseUrl + link,
                     method: "POST",
-                    headers: _headers,
-                    data: {
-                        printTemplateId: "66416e454440575e82074311",
-                        typePrint: "pdf",
-                        lstVoucherId: null,
-                        dataObjectId: "67ea0e34934481e7f74a9a35"
-                    },
+                    headers: { ..._headers, ...dataPost?.headers },
+                    data: dataPost?.data,
                     responseType: "arraybuffer",
                 });
             }
@@ -167,28 +135,31 @@ const PdfDownloadView = (progs: IProg) => {
             const fileInfo = await FileSystem.getInfoAsync(filePath);
 
             if (fileInfo.exists) {
-                console.log("⚠️ File đã tồn tại, xóa file cũ...");
+                // console.log("⚠️ File đã tồn tại, xóa file cũ...");
                 await FileSystem.deleteAsync(filePath, { idempotent: true }); // Xóa file cũ
             }
 
             // Nếu chưa có file thì tải về
-            console.log("⏳ File chưa có, bắt đầu tải xuống...");
+            // console.log("⏳ File chưa có, bắt đầu tải xuống...");
             const base64Data = Buffer.from(response.data, "binary").toString("base64");
 
             // Lưu file và mở
             await saveFileToDownloads(fileName, base64Data);
         } catch (error) {
-            Alert.alert("Lỗi", "Không thể tải file PDF.");
+            Helper.toastShow("Không thể tải file PDF.", true)
             console.error(error);
         } finally {
             setLoading(false);
         }
     };
     return (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-            {loading ? <ActivityIndicator size="large" style={{ margin: 20 }} /> : null}
-            <VcPress title="Tải PDF" onPress={downloadPDF} />
-        </View>
+        <VcPress
+            style={{ width: 45, height: 45 }}
+            pressStyle={{ justifyContent: "center", alignItems: "center" }}
+            onPress={downloadPDF}>
+            {loading ? <ActivityIndicator size="small" style={{ margin: 20 }} color={VcConstant.colors.purple} /> :
+                <MaterialIcons name="cloud-download" size={24} color={VcConstant.colors.purple} />}
+        </VcPress>
     );
 };
-export default PdfDownloadView;
+export default VcBtnDownloadPdf;

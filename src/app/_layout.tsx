@@ -16,7 +16,10 @@ const stackScreens = {
   forgotPass: { headerShown: false },
   listOrgUnit: { headerShown: false },
   setting: { headerShown: false },
-  pageView: { title: "PDF viewer" },
+  viewData: { headerShown: false },
+  pdfViewer: { headerShown: false },
+  webViewer: { title: "https://vacom.com.vn" },
+  dynamicView: { title: "DynamicView" },
   '+not-found': { headerShown: false },
 } as const;
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -39,32 +42,30 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <RootSiblingParent>
-          <PopupProvider>
-            <Provider store={VcStore}>
-              <Stack
-                screenOptions={({ route, navigation }: any) => ({
-                  gestureEnabled: true,
-                  gestureDirection: 'horizontal',
-                  // animation: navigation.getState().type === 'pop'
-                  //   ? 'slide_from_left'
-                  //   : 'slide_from_right',
-                  navigationBarHidden: true,
-                })}
-              >
-                {Object.entries(stackScreens).map(([name, options]) => (
-                  <Stack.Screen
-                    key={name}
-                    name={name}
-                    options={options}
-                  />
-                ))}
-              </Stack>
-            </Provider>
-          </PopupProvider>
-        </RootSiblingParent>
-      </SafeAreaView>
+      <RootSiblingParent>
+        <PopupProvider>
+          <Provider store={VcStore}>
+            <Stack
+              screenOptions={({ route, navigation }: any) => ({
+                gestureEnabled: true,
+                gestureDirection: 'horizontal',
+                // animation: navigation.getState().type === 'pop'
+                //   ? 'slide_from_left'
+                //   : 'slide_from_right',
+                navigationBarHidden: true,
+              })}
+            >
+              {Object.entries(stackScreens).map(([name, options]) => (
+                <Stack.Screen
+                  key={name}
+                  name={name}
+                  options={options}
+                />
+              ))}
+            </Stack>
+          </Provider>
+        </PopupProvider>
+      </RootSiblingParent>
     </GestureHandlerRootView>
   );
 }

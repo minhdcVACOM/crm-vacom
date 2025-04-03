@@ -109,17 +109,6 @@ export const VcApi = {
       postRecoverPass: "/api/app/user/recover-pass"
     },
     window: {
-      dataParam: {
-        windowId: null,
-        menuId: null,
-        quickSearch: "",
-        start: 0,
-        count: 20,
-        continue: null,
-        filterRows: [],
-        filterAdvanced: null,
-        tlbparam: []
-      },
       post: "/api/app/data-object",
       postPages: "/api/app/data-object/pages",
       getById: "/api/app/data-object/by-id/",

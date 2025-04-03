@@ -13,6 +13,7 @@ import VcPress from "./vcPress";
 import { VcText } from "./vcText";
 import VcDrawerItem from "./vcDrawerItem";
 import { usePopup } from "./dialog/popupProvider";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 const styles = StyleSheet.create({
     header: {
         backgroundColor: VcConstant.colors.primary
@@ -121,14 +122,21 @@ const VcDrawerContent = (props: any) => {
             <View style={styles.footer}>
                 <VcDrawerItem
                     label="Cài đặt"
-                    setIcon={({ size, color }) => (<Ionicons name="settings" size={size} color={color} />)}
+                    setIcon={({ size, color }) => (<Ionicons name="settings" size={size} color={VcConstant.colors.primaryDark} />)}
                     onPress={clickSetting}
                     style={{ flex: 1 }}
                 />
                 <VcDrawerItem
                     label=""
+                    setIcon={({ size, color }) => (<MaterialCommunityIcons name="web" size={size} color={VcConstant.colors.blue} />)}
+                    onPress={() => router.navigate("/webViewer")}
+                    style={{ width: 60 }}
+                />
+                <VcDrawerItem
+                    label=""
                     setIcon={({ size, color }) => (<AntDesign name="logout" size={size} color={VcConstant.colors.purple} />)}
                     onPress={clickLogout}
+                    style={{ width: 60 }}
                 />
             </View>
         </View>

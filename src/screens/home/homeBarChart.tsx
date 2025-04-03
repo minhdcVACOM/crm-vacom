@@ -90,9 +90,9 @@ const HomeBarChart = (progs: IProgs) => {
                     onPress={(v: any) => {
                         // showPopup({
                         //     title: v.title,
-                        //     message: " số lượng: " + v.value
+                        //     message: " số lượng: " + v.value , v.frontColor
                         // });
-                        Helper.toastShow(v.title + ": số lượng = " + v.value, true);
+                        Helper.toastShow(v.title + ": số lượng = " + v.value, true, v.frontColor);
                     }}
                 />
             </View>

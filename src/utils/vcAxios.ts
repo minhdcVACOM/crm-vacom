@@ -1,42 +1,9 @@
 import axios from "axios";
 import { Helper } from "./helper";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { VcApi } from "./constant";
 import { loginHelper } from "./hooks/loginHelper";
 
 const { getTenant, getToken, getLinkApi, getOrdCode } = loginHelper();
-/*
-const getTenant = async () => {
-    try {
-        return await AsyncStorage.getItem(VcApi.keyStorage.tenant);
-    } catch (error) {
-        return null;
-    }
-}
-const getToken = async () => {
-    try {
-        return await AsyncStorage.getItem(VcApi.keyStorage.token);
-    } catch (error) {
-        return null;
-    }
-}
-const getLinkApi = async (callBack?: (res: any) => void) => {
-    try {
-        const baseApi = await AsyncStorage.getItem(VcApi.keyStorage.urlBase);
-        return baseApi ?? VcApi.urlBase;
-    } catch (error) {
-        if (callBack) callBack(null);
-        return null;
-    }
-}
-const getOrdCode = async () => {
-    try {
-        return await AsyncStorage.getItem(VcApi.keyStorage.orgCode);
-    } catch (error) {
-        return null;
-    }
-}
-*/
+
 const vcAxios = axios.create(
     {
         validateStatus: () => true // chấp nhận các cuộc gọi đến HTTP://
